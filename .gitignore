@@ -1,0 +1,19 @@
+# Secrets
+.env
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.pytest_cache/
+
+# Données locales (On ne veut pas uploader les photos de CNI de test)
+data/image_entree/*
+data/sortie/*
+!data/image_entree/.gitkeep
+!data/sortie/.gitkeep
+
+# Docker
+.dockerignore
