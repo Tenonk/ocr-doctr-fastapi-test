@@ -1,0 +1,15 @@
+
+
+services:
+  ocr-service:
+    build: .
+    container_name: ocr_test_container
+    ports:
+      - "8000:8000"  # [Port PC]:[Port Conteneur]
+    volumes:
+      # On lie ton dossier local aux dossiers du WORKDIR /app
+      - ./data/image_entree:/app/data/image_entree
+      - ./data/sortie:/app/data/sortie
+    env_file:
+      - .env
+    restart: always

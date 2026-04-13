@@ -6,7 +6,7 @@ from doctr.utils.visualization import visualize_page
 from PIL import Image
 
 # Initialisation unique du modèle
-model = ocr_predictor(pretrained=True)
+model = ocr_predictor(pretrained=True).cpu()
 
 def extraire_texte_et_preuve(chemin_fichier, dossier_sortie):
     """

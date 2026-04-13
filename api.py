@@ -29,13 +29,15 @@ async def root():
 async def extract_cni(file: UploadFile = File(...)):
     
     # ÉTAPE 1 : Validation du format
+
     formats_acceptes = ["image/jpeg", "image/png", "application/pdf"]
     if file.content_type not in formats_acceptes:
         raise HTTPException(status_code=400, detail="Format non supporté.")
+    
 
     # ÉTAPE 2 : Nettoyage du nom de fichier (CRUCIAL pour Windows)
     # On remplace tout ce qui n'est pas lettre/chiffre par un underscore
-    # Cela règle le problème des "Capture d'écran..."
+
     nom_propre = re.sub(r'[^a-zA-Z0-9.]', '_', file.filename)
     file_path = os.path.abspath(os.path.join(UPLOAD_DIR, nom_propre))
     
@@ -53,6 +55,7 @@ async def extract_cni(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Erreur d'écriture : {e}")
 
     # ÉTAPE 3 : Pipeline IA
+    
     try:
         # On passe le chemin nettoyé à l'OCR
         texte_brut = extraire_texte_et_preuve(file_path, OUTPUT_DIR)
