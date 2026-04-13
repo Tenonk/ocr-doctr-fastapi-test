@@ -1,15 +1,16 @@
-# 1. Utilisation de Python 3.12 pour correspondre à ton pyproject.toml
 FROM python:3.12-slim
 
-# 2. Variables d'environnement pour Python et Poetry
+# 1. Variables d'environnement optimisées
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_VERSION=2.0.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_CREATE=false \
+    USE_TF=0 \
+    USE_TORCH=1 \
     PATH="/opt/poetry/bin:$PATH"
 
-# 3. Dépendances système (Ajout de libgl1 et nettoyage)
+# 2. Dépendances système (libgl1 est vital pour docTR)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libgl1 \
@@ -19,17 +20,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# 4. Installation de Poetry version 2.x
-RUN curl -sSL https://install.python-poetry.org | python3 -
+# 3. Installation de Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 - --version 2.0.1
 
 WORKDIR /app
 
-# 5. Installation des dépendances (Séparé du code pour le cache)
+# 4. Installation des dépendances
 COPY pyproject.toml poetry.lock* ./
-RUN poetry install --no-root --no-ansi
+# Note: Si tu as besoin de tf2onnx ou protobuf spécifique, 
+# assure-toi qu'ils sont dans ton pyproject.toml
+RUN poetry install --no-root --no-interaction --no-ansi
 
-# 6. Copie du reste du projet
 COPY . .
 
-# 7. Lancement de l'API (FastAPI par défaut)
+# 5. Exposition du port pour FastAPI
+EXPOSE 8000
+
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]

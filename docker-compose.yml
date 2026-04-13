@@ -1,15 +1,36 @@
-
-
 services:
   ocr-service:
-    build: .
-    container_name: ocr_test_container
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: eburni_kan_api
     ports:
-      - "8000:8000"  # [Port PC]:[Port Conteneur]
+      - "8000:8000"
     volumes:
-      # On lie ton dossier local aux dossiers du WORKDIR /app
-      - ./data/image_entree:/app/data/image_entree
-      - ./data/sortie:/app/data/sortie
+      # Utilisation de chemins relatifs propres
+      - ./data/image_entree:/app/data/image_entree:rw
+      - ./data/sortie:/app/data/sortie:rw
     env_file:
       - .env
-    restart: always
+    environment:
+      # On force ces variables ici au cas où elles manquent dans le .env
+      - USE_TF=0
+      - USE_TORCH=1
+      - TZ=Africa/Abidjan
+    # Limitation des ressources pour éviter que le conteneur ne fasse crasher ton PC/Serveur
+    deploy:
+      resources:
+        limits:
+          memory: 4G    # docTR + PyTorch sont gourmands
+    # Gestion du GPU (Optionnel : décommente si tu as NVIDIA Container Toolkit installé)
+    # reservations:
+    #   devices:
+    #     - driver: nvidia
+    #       count: 1
+    #       capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
